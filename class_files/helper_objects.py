@@ -3,6 +3,7 @@ import os,time
 from collections import namedtuple
 from os import getcwd
 from collections import defaultdict
+import platform
 
 secp256k1curve=ecdsa.ellipticcurve.CurveFp(115792089237316195423570985008687907853269984665640564039457584007908834671663,0,7)
 secp256k1point=ecdsa.ellipticcurve.Point(secp256k1curve,0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798,0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141)
@@ -238,7 +239,10 @@ def read_parameter_file(file_to_read):
     charset = list(set(''))
     
     # Open the file for reading from input_files
-    readfile = open('..\\input_files\\'+file_to_read,'r')
+    if(platform.system() == 'Windows'):
+        readfile = open('..\\input_files\\'+file_to_read,'r')
+    elif(platform.system() == 'Linux'):
+        readfile = open('..//input_files//'+file_to_read,'r')
     
     # Counts the number of lines with invalid paramters
     invalid_counter = 0
