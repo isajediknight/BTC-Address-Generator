@@ -2,10 +2,11 @@ import sys
 import os
 from os import getcwd
 import platform
-if(platform.system() == 'Windows'):
-    sys.path.insert(0,'../class_files/')
-elif(platform.system() == 'Linux'):
-    sys.path.insert(0,'..\\class_files\\')
+# this is not working the way i want yet
+#if(platform.system() == 'Windows'):
+#    sys.path.insert(0,'../class_files/')
+#elif(platform.system() == 'Linux'):
+#    sys.path.insert(0,'..\\class_files\\')
 sys.path.insert(0,'..//class_files//')
 from helper_objects import privkey
 from helper_objects import addy
@@ -16,7 +17,7 @@ import datetime
 
 def run(param_file = 'gen_btc_addr.input'):
     parameters = read_parameter_file(param_file)
-    print(get_end_date(param_file))
+    #print(get_end_date(param_file))
 
     if(platform.system() == 'Windows'):
         slashes = list(find_all(getcwd(),'\\'))
@@ -30,15 +31,45 @@ def run(param_file = 'gen_btc_addr.input'):
         output_files = get_file_list(output_files_dir)
         class_files = get_file_list(class_files_dir)
         
-    elif(platform.system() == 'Linux'):
-        get_file_list
 
-    return 0
+    elif(platform.system() == 'Linux'):
+        slashes = list(find_all(getcwd(),'/'))
+        input_files_dir = getcwd()[:slashes[-1]+1]+'input_files/'
+        output_files_dir = getcwd()[:slashes[-1]+1]+'output_files/'
+        class_files_dir = getcwd()[:slashes[-1]+1]+'class_files/'
+        scripts_dir = getcwd()
+        # Assumes this script is actually run from the //scripts directory
+        scripts_files = get_file_list(scripts_dir)
+        input_files = get_file_list(input_files_dir)
+        output_files = get_file_list(output_files_dir)
+        class_files = get_file_list(class_files_dir)
+
+    
     #start = datetime.datetime.now()
-    key = privkey()
-    add = addy(int(key,16))
-    out_string = key+',1'+add
-    print(out_string)
+    end_date = get_end_date(param_file)
+    outfile = open(output_files_dir + 'try1.txt','w')
+    counter = 0
+    out_string = ''
+    five_hundred_counter = 0
+    print('Running until '+str(end_date))
+    check = end_date > datetime.datetime.now()
+    start_500 = datetime.datetime.now()
+    while(check):
+        counter += 1
+        key = privkey()
+        add = addy(int(key,16))
+        out_string += key+',1'+add+'\n'
+        if(counter % 500 == 0):
+            diff = (datetime.datetime.now() - start_500).seconds
+            outfile.write(out_string)
+            counter = 0
+            out_string = ''
+            five_hundred_counter += 1
+            print('500 x '+str(five_hundred_counter) + '\t' + str(diff) + '\tseconds' )
+            check = end_date > datetime.datetime.now()
+            start_500 = datetime.datetime.now()
+    outfile.write(out_string)
+    outfile.close()
     #print((datetime.datetime.now() - start).microseconds)
 
 def print_list(my_list):
