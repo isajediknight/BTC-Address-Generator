@@ -2,22 +2,25 @@ import sys
 import os
 from os import getcwd
 import platform
-# this is not working the way i want yet
-#if(platform.system() == 'Windows'):
-#    sys.path.insert(0,'../class_files/')
-#elif(platform.system() == 'Linux'):
-#    sys.path.insert(0,'..\\class_files\\')
-sys.path.insert(0,'..//class_files//')
-from helper_objects import privkey
-from helper_objects import addy
+
+# Add class_files to the system path for importing our modules
+if(platform.system() == 'Windows'):
+    sys.path.insert(0,'..\\class_files\\')
+elif(platform.system() == 'Linux'):
+    sys.path.insert(0,'..//class_files//')
+
+from ecdsa_objects import privkey
+from ecdsa_objects import addy
 from helper_objects import read_parameter_file
 from helper_objects import find_all
 from helper_objects import get_file_list
+from helper_objects import print_list
 import datetime
 
-def run(param_file = 'gen_btc_addr.input'):
+def run(param_file = 'gen_btc_addr.input',commit_interval = 1000):
+    """
+    """
     parameters = read_parameter_file(param_file)
-    #print(get_end_date(param_file))
 
     if(platform.system() == 'Windows'):
         slashes = list(find_all(getcwd(),'\\'))
@@ -44,40 +47,70 @@ def run(param_file = 'gen_btc_addr.input'):
         output_files = get_file_list(output_files_dir)
         class_files = get_file_list(class_files_dir)
 
-    
-    #start = datetime.datetime.now()
     end_date = get_end_date(param_file)
-    outfile = open(output_files_dir + 'try1.txt','w')
+    cur_datetime = datetime.datetime.now()
+
+    # Build output filename
+    # YYYY-MM-DD-COMPUTERNAME.txt
+    output_file_name = str(cur_datetime.year) + '-'
+    output_file_name += (('0' + str(cur_datetime.month)) if (len(str(cur_datetime.month)) == 1) else str(cur_datetime.month)) + '-'
+    output_file_name += (('0' + str(cur_datetime.day)) if (len(str(cur_datetime.day)) == 1) else str(cur_datetime.day)) + '-'
+    output_file_name += platform.uname()[1]+ '.txt'
+
+    if(output_file_name in output_files):
+        outfile = open(output_files_dir + output_file_name,'a')
+    else:
+        outfile = open(output_files_dir + output_file_name,'w')
+    
     counter = 0
     out_string = ''
-    five_hundred_counter = 0
+    commit_interval_counter = 0
     print('Running until '+str(end_date))
+    print('Writing to: ' + output_file_name)
+    start_benchmark = datetime.datetime.now()
     check = end_date > datetime.datetime.now()
-    start_500 = datetime.datetime.now()
     while(check):
         counter += 1
         key = privkey()
         add = addy(int(key,16))
         out_string += key+',1'+add+'\n'
-        if(counter % 500 == 0):
-            diff = (datetime.datetime.now() - start_500).seconds
+        if(counter % commit_interval == 0):
+            diff = (datetime.datetime.now() - start_benchmark).seconds
             outfile.write(out_string)
             counter = 0
             out_string = ''
-            five_hundred_counter += 1
-            print('500 x '+str(five_hundred_counter) + '\t' + str(diff) + '\tseconds' )
+            commit_interval_counter += 1
+            print(str(commit_interval) + ' x' + str(commit_interval_counter) + '\t' + str(diff) + '\tseconds' )
             check = end_date > datetime.datetime.now()
-            start_500 = datetime.datetime.now()
+            start_benchmark = datetime.datetime.now()
+
+            new_file_name = str(start_benchmark.year) + '-'
+            new_file_name += (('0' + str(start_benchmark.month)) if (len(str(start_benchmark.month)) == 1) else str(start_benchmark.month)) + '-'
+            new_file_name += (('0' + str(start_benchmark.day)) if (len(str(start_benchmark.day)) == 1) else str(start_benchmark.day))
+
+            if(output_file_name[:10] == new_file_name):
+                pass
+            else:
+                outfile.close()
+                del outfile
+                output_files = get_file_list(output_files_dir)
+
+                cur_datetime = datetime.datetime.now()
+
+                output_file_name = str(cur_datetime.year) + '-'
+                output_file_name += (('0' + str(cur_datetime.month)) if (len(str(cur_datetime.month)) == 1) else str(cur_datetime.month)) + '-'
+                output_file_name += (('0' + str(cur_datetime.day)) if (len(str(cur_datetime.day)) == 1) else str(cur_datetime.day)) + '-'
+                output_file_name += platform.uname()[1]+ '.txt'
+                
+                if((new_file_name + '-' + platform.uname()[1]+ '.txt' ) in output_files):
+                    outfile = open(output_files_dir + output_file_name,'a')
+                else:
+                    outfile = open(output_files_dir + output_file_name,'w')
+                    print('Switching to a new ouput file: ' + output_file_name)
+                
     outfile.write(out_string)
     outfile.close()
     #print((datetime.datetime.now() - start).microseconds)
-
-def print_list(my_list):
-    """
-    Takes a list and prints it out
-    """
-    for i in range(len(my_list)):
-        print(my_list[i])
 
 def get_end_date(param_file = 'gen_btc_addr.input'):
     """
