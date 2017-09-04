@@ -1,4 +1,4 @@
-{end_date}09/03/2017
-{end_time}00:02
-{copy_file_to_ip}IPADDRESS
-{copy_file_to_directory}PLACEHOLDER
+{end_date}09/04/2017
+{end_time}00:59
+{commit_interval}1000
+{run_description}1

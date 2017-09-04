@@ -15,11 +15,16 @@ from helper_objects import read_parameter_file
 from helper_objects import find_all
 from helper_objects import get_file_list
 from helper_objects import print_list
+from helper_objects import secs_mins_hours_days_as_time_part
+from helper_objects import secs_mins_hours_days_as_str_digit
 import datetime
 
-def run(param_file = 'gen_btc_addr.input',commit_interval = 1000):
+def run(param_file = 'gen_btc_addr.input'):
     """
     """
+
+    start = datetime.datetime.now()
+    
     parameters = read_parameter_file(param_file)
 
     if(platform.system() == 'Windows'):
@@ -54,8 +59,9 @@ def run(param_file = 'gen_btc_addr.input',commit_interval = 1000):
     # YYYY-MM-DD-COMPUTERNAME.txt
     output_file_name = str(cur_datetime.year) + '-'
     output_file_name += (('0' + str(cur_datetime.month)) if (len(str(cur_datetime.month)) == 1) else str(cur_datetime.month)) + '-'
-    output_file_name += (('0' + str(cur_datetime.day)) if (len(str(cur_datetime.day)) == 1) else str(cur_datetime.day)) + '-'
-    output_file_name += platform.uname()[1]+ '.txt'
+    output_file_name += (('0' + str(cur_datetime.day)) if (len(str(cur_datetime.day)) == 1) else str(cur_datetime.day)) + '_'
+    output_file_name += platform.uname()[1] + '_'
+    output_file_name += parameters['run_description'] + '.txt'
 
     if(output_file_name in output_files):
         outfile = open(output_files_dir + output_file_name,'a')
@@ -74,13 +80,15 @@ def run(param_file = 'gen_btc_addr.input',commit_interval = 1000):
         key = privkey()
         add = addy(int(key,16))
         out_string += key+',1'+add+'\n'
-        if(counter % commit_interval == 0):
+        if(counter % int(parameters['commit_interval']) == 0):
             diff = (datetime.datetime.now() - start_benchmark).seconds
             outfile.write(out_string)
             counter = 0
             out_string = ''
             commit_interval_counter += 1
-            print(str(commit_interval) + ' x' + str(commit_interval_counter) + '\t' + str(diff) + '\tseconds' )
+            how_long_until_we_stop = datetime.datetime.now() - end_date
+            print(parameters['commit_interval'] + ' x' + str(commit_interval_counter) + ' took: ' + str(diff) + ' Seconds.  Running for another: ' +
+                  secs_mins_hours_days_as_str_digit(how_long_until_we_stop.seconds) + ' ' + secs_mins_hours_days_as_time_part(how_long_until_we_stop.seconds))
             check = end_date > datetime.datetime.now()
             start_benchmark = datetime.datetime.now()
 
@@ -99,8 +107,9 @@ def run(param_file = 'gen_btc_addr.input',commit_interval = 1000):
 
                 output_file_name = str(cur_datetime.year) + '-'
                 output_file_name += (('0' + str(cur_datetime.month)) if (len(str(cur_datetime.month)) == 1) else str(cur_datetime.month)) + '-'
-                output_file_name += (('0' + str(cur_datetime.day)) if (len(str(cur_datetime.day)) == 1) else str(cur_datetime.day)) + '-'
-                output_file_name += platform.uname()[1]+ '.txt'
+                output_file_name += (('0' + str(cur_datetime.day)) if (len(str(cur_datetime.day)) == 1) else str(cur_datetime.day)) + '_'
+                output_file_name += platform.uname()[1] + '_'
+                output_file_name += parameters['run_description'] + '.txt'
                 
                 if((new_file_name + '-' + platform.uname()[1]+ '.txt' ) in output_files):
                     outfile = open(output_files_dir + output_file_name,'a')
