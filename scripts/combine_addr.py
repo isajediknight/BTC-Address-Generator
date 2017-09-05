@@ -1,14 +1,27 @@
+# Used to determine Computer Name
 import platform
+
 import sys
 # Add class_files to the system path for importing our modules
+# As in helper_objects.py
 if(platform.system() == 'Windows'):
     sys.path.insert(0,'..\\class_files\\')
 elif(platform.system() == 'Linux'):
     sys.path.insert(0,'..//class_files//')
+
+# Gets list of files in a directory (no recursive)
 from helper_objects import get_file_list
+
+# Gets parameters from parameter file
 from helper_objects import read_parameter_file
+
+# Prints out all the values in a list
 from helper_objects import print_list
+
+# Used for benchmarking
 import datetime
+
+# Used for copying/moving files
 import shutil
 
 def run(parameter_file):
@@ -83,6 +96,7 @@ def run(parameter_file):
         else:
             print('Ignored:\t' + my_file)
 
+    # Total number of Addresses imported
     print('Addresses imported: ' + str(total_processed))
 
     # Display any errors to the user

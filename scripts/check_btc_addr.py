@@ -1,15 +1,16 @@
+import sys
+sys.path.insert(0,'..//class_files//')
+import datetime
+from helper_objects import read_parameter_file
+from helper_objects import find_all
+from helper_objects import secs_mins_hours_days
+
 def run(parameter_file):
     """
     Method to check if existing BTC address was used
 
     btc_gen_addr_file should be an absolute path
     """
-    import sys
-    sys.path.insert(0,'..//class_files//')
-    import datetime
-    from helper_objects import read_parameter_file
-    from helper_objects import find_all
-    from helper_objects import secs_mins_hours_days
 
     start = datetime.datetime.now()
     parameters = read_parameter_file('address_check.input')
