@@ -213,7 +213,7 @@ def read_parameter_file(file_to_read):
         else:
             # Make all keys lowercase
             parameter_search[line[int(parameter_name_begin)+1:int(parameter_name_end)].lower()] = charset_locs
-            parameters[line[int(parameter_name_begin)+1:int(parameter_name_end)].lower()] = line[charset_locs['}'][0]+1:].strip('\n')
+            parameters[line[int(parameter_name_begin)+1:int(parameter_name_end)].lower()] = line[charset_locs['}'][0]+1:].strip('\n').strip()
             
     # Close the file
     readfile.close()

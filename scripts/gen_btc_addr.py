@@ -41,6 +41,9 @@ from helper_objects import secs_mins_hours_days_as_str_digit
 # Used for benchmarking
 import datetime
 
+# Used for slowing down CPU usage
+import time
+
 def run(param_file = 'gen_btc_addr.input'):
     """
     """
@@ -83,11 +86,14 @@ def run(param_file = 'gen_btc_addr.input'):
 
     # Build output filename
     # YYYY-MM-DD-COMPUTERNAME.txt
+    cur_datetime = datetime.datetime.now()
     output_file_name = str(cur_datetime.year) + '-'
     output_file_name += (('0' + str(cur_datetime.month)) if (len(str(cur_datetime.month)) == 1) else str(cur_datetime.month)) + '-'
     output_file_name += (('0' + str(cur_datetime.day)) if (len(str(cur_datetime.day)) == 1) else str(cur_datetime.day)) + '_'
-    output_file_name += platform.uname()[1] + '_'
-    output_file_name += parameters['run_description'] + '.txt'
+    output_file_name += platform.uname()[1]
+    if(len(parameters['run_description']) > 0):
+        output_file_name += '_' + parameters['run_description']
+    output_file_name += '.txt'
 
     # If file exists append to it, otherwise create it
     # 'w' will delete and recreate the file - losing your data
@@ -111,7 +117,7 @@ def run(param_file = 'gen_btc_addr.input'):
     # Name of the output file
     print('Writing to: ' + output_file_name)
 
-    # 
+    # Begin benchmark
     start_benchmark = datetime.datetime.now()
 
     # Checks to see if we have reached the end date
@@ -129,6 +135,9 @@ def run(param_file = 'gen_btc_addr.input'):
 
         # Save address and private key to this variable to be written out
         out_string += key+',1'+add+'\n'
+
+        if(float(parameters['sleep']) > 0):
+            time.sleep(float(parameters['sleep']))
 
         # Once we reach our commit interval save all of it off
         if(counter % int(parameters['commit_interval']) == 0):
@@ -180,8 +189,10 @@ def run(param_file = 'gen_btc_addr.input'):
                 output_file_name = str(cur_datetime.year) + '-'
                 output_file_name += (('0' + str(cur_datetime.month)) if (len(str(cur_datetime.month)) == 1) else str(cur_datetime.month)) + '-'
                 output_file_name += (('0' + str(cur_datetime.day)) if (len(str(cur_datetime.day)) == 1) else str(cur_datetime.day)) + '_'
-                output_file_name += platform.uname()[1] + '_'
-                output_file_name += parameters['run_description'] + '.txt'
+                output_file_name += platform.uname()[1]
+                if(len(parameters['run_description']) > 0):
+                    output_file_name += '_' + parameters['run_description']
+                output_file_name += '.txt'
 
                 # If file exists append to it otherwise create it new
                 if((new_file_name + '-' + platform.uname()[1]+ '.txt' ) in output_files):
@@ -194,7 +205,7 @@ def run(param_file = 'gen_btc_addr.input'):
                 # Graceful stop requested
                 print('Graceful stop requested.  Please delete: ' + output_files_dir + 'graceful_stop before running again.')
                 break
-                
+    
     outfile.write(out_string)
     outfile.close()
     #print((datetime.datetime.now() - start).microseconds)
